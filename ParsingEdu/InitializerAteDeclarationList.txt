@@ -1,0 +1,12 @@
+Initializer_list SETA Initializer Initializer_list'
+Initializer_list' SETA , Initializer Initializer_list' | VAZIO
+Initializer SETA Expression | Initializer'
+Initializer' SETA { Initializer_list Initializer''
+Initializer'' SETA , } | }
+Init_declarator SETA Declarator = Initializer | Declarator
+Init_declarator_list SETA Init_declarator Init_declarator_list'
+Init_declarator_list' SETA , Init_declarator Init_declarator_list' | VAZIO
+Declaration SETA Declaration_specifiers Declaration'
+Declaration' SETA ; | Declaration_specifiers Init_declarator_list ;
+Declaration_list SETA Declaration Declaration_list'
+Declaration_list' SETA Declaration Declaration_list' | VAZIO

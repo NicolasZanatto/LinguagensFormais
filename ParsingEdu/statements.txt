@@ -1,0 +1,12 @@
+Statement SETA Compound_statement | Expression_statement | Selection_statement | Iteration_statement | Jump_statement
+Statement_list SETA Statement Statement_list'
+Statement_list' SETA Statement Statement_list' | VAZIO
+Compound_statement SETA { Compound_statement'
+Compound_statement' SETA } | Statement_list } | Declaration_list Compound_statement''
+Compound_statement'' SETA } | Statement_list }
+Expression_statement SETA ; | Expression ;
+Selection_statement SETA if ( Expression ) Statement Selection_statement'
+Selection_statement' SETA else Statement | VAZIO
+Iteration_statement SETA while ( Expression ) Statement | do Statement while ( Expression ) ; | for ( Expression_statement Expression_statement Iteration_statement'
+Iteration_statement' SETA ) Statement | Expression ) Statement
+Jump_statement SETA goto identifier ;  | continue ;  | break ;  | return ;  | return Expression ;

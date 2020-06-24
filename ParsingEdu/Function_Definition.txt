@@ -1,0 +1,4 @@
+Function_definition SETA Declaration_specifiers Declarator Function_definition’
+Function_definition SETA Declarator Function_definition’
+Function_definition’ SETA Declaration_list Compound_statement
+Function_definition’ SETA Compound_statement

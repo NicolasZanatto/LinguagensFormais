@@ -1,0 +1,12 @@
+Expression SETA ExpressionA Expression'
+Expression' SETA + ExpressionA Expression' | - ExpressionA Expression' | * ExpressionA Expression' | / ExpressionA Expression' | % ExpressionA Expression' | VAZIO
+ExpressionA SETA ExpressionB ExpressionA'
+ExpressionA' SETA & ExpressionB ExpressionA' | bitor ExpressionB ExpressionA' | ^ ExpressionB ExpressionA' | ~ ExpressionB ExpressionA' | VAZIO
+ExpressionB SETA ExpressionC ExpressionB'
+ExpressionB' SETA == ExpressionC ExpressionB' | != ExpressionC ExpressionB' | > ExpressionC ExpressionB' | < ExpressionC ExpressionB' | >= ExpressionC ExpressionB' | <= ExpressionC ExpressionB' | VAZIO
+ExpressionC SETA ExpressionD ExpressionC'
+ExpressionC' SETA && ExpressionD ExpressionC' | or ExpressionD ExpressionC' | ! ExpressionD ExpressionC' | VAZIO
+ExpressionD SETA num | identifier | ( Expression ) 
+External_declaration SETA Function_definition | Declaration
+Translation_unit SETA External_declaration Translation_unit'
+Translation_unit' SETA External_declaration Translation_unit' | VAZIO
