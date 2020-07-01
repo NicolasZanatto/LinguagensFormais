@@ -46,6 +46,22 @@
 #define TKGoto 46
 #define TKContinue 47 
 #define TKBreak 48
+#define TKAtribMul 49
+#define TKAtribDiv 50
+#define TKAtribRes 51
+#define TKAtribSom 52
+#define TKAtribSub 53
+#define TKAtribShiftLeft 54
+#define TKAtribShiftRight 55
+#define TKAtribAnd 56
+#define TKAtribXor 57
+#define TKAtribOr 58
+#define TKPonto 59
+#define TKFlecha 60
+#define TKShiftLeft 61
+#define TKShiftRight 62
+#define TKUnion 63
+#define TKSizeof 64
 
 #define false 0
 #define true 1
@@ -76,6 +92,8 @@ struct pal_res lista_pal[]={{"void",TKVoid},
                   {"else", TKElse},
                   {"return", TKReturn},
                   {"struct", TKStruct},
+                  {"union", TKUnion},
+                  {"sizeof", TKUnion},
                   {"fimtabela",TKId}};
 
 int palavra_reservada(char lex[])
@@ -100,7 +118,9 @@ long int posglobal;
 int tkant;
 
 void marcaPosToken() {
+	printf("posglobal:%ld,tk:%d\n",posglobal,tk);
 	posglobal=ftell(arqin);
+	printf("posglobal:%ld,tk:%d\n",posglobal,tk);
 	tkant=tk;
 }
 
@@ -108,7 +128,6 @@ void marcaPosToken() {
 
 void restauraPosToken() {
 	fseek(arqin,posglobal,SEEK_SET);
-	proxC();
 	tk=tkant;
 }
 
@@ -120,7 +139,7 @@ if (feof(arqin)) {
    return;
    }
 fread(&c,1,1,arqin);
-//printf("Leu caracter %c\n",c);
+printf("Leu caracter %c\n",c);
 }
 
 void getToken()
@@ -181,6 +200,13 @@ while (!fim)
 				   proxC();
 				   tk=TKDuploMais;printf("Reconheceu token TKDuploMais\n");return;
 				   }
+				else if (c=='=')
+			       {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribSom;printf("Reconheceu token TKAtribSom\n");return;
+				   }
 				else
 				   {
 	               lex[posl]='\0';
@@ -198,6 +224,20 @@ while (!fim)
 				   proxC();
 				   tk=TKDuploSub;printf("Reconheceu token TKDuploSub\n");return;
 				   }
+				else if (c=='=')
+			    {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribSub;printf("Reconheceu token TKAtribSub\n");return;
+				}
+				else if (c=='>')
+			    {
+				   lex[posl++]='>';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKFlecha;printf("Reconheceu token TKFlecha\n");return;
+				}
 				else
 				   {
 	               lex[posl]='\0';
@@ -213,6 +253,13 @@ while (!fim)
 				   proxC();
 				   tk=TKLogicoOR;printf("Reconheceu token TKLogicoOR \n");return;
 			    }
+			    else if (c=='=')
+			    {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribOr;printf("Reconheceu token TKAtribOr\n");return;
+				}
 				else{
 	               lex[posl]='\0';
 				   tk=TKBitOR;printf("Reconheceu token TKBitOR\n");return;
@@ -222,12 +269,19 @@ while (!fim)
 			 {
 			    proxC();
 				if (c=='&')
-			       {
+		        {
 				   lex[posl++]='&';
-     			   lex[posl]='\0';
+	 			   lex[posl]='\0';
 				   proxC();
 				   tk=TKLogicoAND;printf("Reconheceu token TKLogicoAND\n");return;
-				   }
+			    }
+			    else if (c=='=')
+		    	{
+				   lex[posl++]='=';
+	 			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribAnd;printf("Reconheceu token TKAtribAnd\n");return;
+				}
 				else
 				   {
 	               lex[posl]='\0';
@@ -260,6 +314,20 @@ while (!fim)
 				   proxC();
 				   tk=TKRelacMAIORouIGUAL;printf("Reconheceu token TKRelacMAIORouIGUAL\n");return;
 				   }
+				else if(c == '>'){
+					proxC();
+					if (c=='=')
+			        {
+					   lex[posl++]='=';
+	     			   lex[posl]='\0';
+					   proxC();
+					   tk=TKAtribShiftRight;printf("Reconheceu token TKAtribShiftRight\n");return;
+				    }
+				    else{
+				    	lex[posl]='\0';
+				   		tk=TKShiftRight;printf("Reconheceu token TKShiftRight\n");return;
+					}
+				}
 				else
 				   {
 	               lex[posl]='\0';
@@ -276,15 +344,90 @@ while (!fim)
 				   proxC();
 				   tk=TKRelacMENORouIGUAL;printf("Reconheceu token TKRelacMENORouIGUAL\n");return;
 				   }
+				else if(c == '<'){
+					proxC();
+					if (c=='=')
+			        {
+					   lex[posl++]='=';
+	     			   lex[posl]='\0';
+					   proxC();
+					   tk=TKAtribShiftLeft;printf("Reconheceu token TKAtribShiftLeft\n");return;
+				    }
+				    else{
+				    	lex[posl]='\0';
+				   		tk=TKShiftLeft;printf("Reconheceu token TKShiftLeft\n");return;
+					}
+				}
 				else
 				   {
 	               lex[posl]='\0';
 				   tk=TKRelacMENORQUE;printf("Reconheceu token TKRelacMENORQUE\n");return;
 				   }
 			 }
-             if (c=='*'){lex[posl]='\0';proxC();tk=TKProd;printf("Reconheceu token TKProd\n");return;}
-			 if (c=='/'){lex[posl]='\0';proxC();tk=TKDiv;printf("Reconheceu token TKDiv\n");return;}
-			 if (c=='%'){lex[posl]='\0';proxC();tk=TKRestoDiv;printf("Reconheceu token TKRestoDiv\n");return;}
+			 if (c=='*')
+			 {
+			    proxC();
+				if (c=='=')
+			       {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribMul;printf("Reconheceu token TKAtribMul\n");return;
+				   }
+				else
+				   {
+	               lex[posl]='\0';
+				   tk=TKProd;printf("Reconheceu token TKProd\n");return;
+				   }
+			 }
+			 if (c=='/')
+			 {
+			    proxC();
+				if (c=='=')
+			       {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribDiv;printf("Reconheceu token TKAtribDiv\n");return;
+				   }
+				else
+				   {
+	               lex[posl]='\0';
+				   tk=TKDiv;printf("Reconheceu token TKDiv\n");return;
+				   }
+			 }
+			 if (c=='%')
+			 {
+			    proxC();
+				if (c=='=')
+			       {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribRes;printf("Reconheceu token TKAtribRes\n");return;
+				   }
+				else
+				   {
+	               lex[posl]='\0';
+				   tk=TKRestoDiv;printf("Reconheceu token TKRestoDiv\n");return;
+				   }
+			 }
+			 if (c=='^')
+			 {
+			    proxC();
+				if (c=='=')
+			       {
+				   lex[posl++]='=';
+     			   lex[posl]='\0';
+				   proxC();
+				   tk=TKAtribXor;printf("Reconheceu token TKAtribXor\n");return;
+				   }
+				else
+				   {
+	               lex[posl]='\0';
+				   tk=TKBitXOR;printf("Reconheceu token TKBitXOR\n");return;
+				   }
+			 }
              if (c=='('){lex[posl]='\0';proxC();tk=TKAbreParenteses;printf("Reconheceu token TKAbrePar\n");return;}
              if (c==')'){lex[posl]='\0';proxC();tk=TKFechaParenteses;printf("Reconheceu token FechaPar\n");return;}
              if (c=='{'){lex[posl]='\0';proxC();tk=TKAbreChaves;printf("Reconheceu token TKAbreChaves\n");return;}
@@ -292,6 +435,7 @@ while (!fim)
              if (c==','){lex[posl]='\0';proxC();tk=TKVirgula;printf("Reconheceu token TKVirgula\n");return;}
              if (c==';'){lex[posl]='\0';proxC();tk=TKPontoEVirgula;printf("Reconheceu token TKPontoEVirgula\n");return;}
              if (c==':'){lex[posl]='\0';proxC();tk=TKDoisPontos;printf("Reconheceu token TKDoisPontos\n");return;}
+             if (c=='.'){lex[posl]='\0';proxC();tk=TKPonto;printf("Reconheceu token TKPonto\n");return;}
              if (c=='^'){lex[posl]='\0';proxC();tk=TKBitXOR;printf("Reconheceu token TKBitXOR\n");return;}
              if (c=='~'){lex[posl]='\0';proxC();tk=TKBitNOT;printf("Reconheceu token TKBitNOT\n");return;}
 			 if (c=='!'){lex[posl]='\0';proxC();tk=TKLogicoNot;printf("Reconheceu token TKLogicoNot\n");return;}
@@ -348,6 +492,8 @@ int Parameter_list1Linha();
 
 int Parameter_declaration();
 
+int Parameter_declaration1Linha();
+
 int Declaration_specifiers();
 
 int Declarator();
@@ -388,24 +534,6 @@ int Jump_statement();
 
 int Jump_statement1Linha();
 
-int Expression();
-
-int Expression1Linha();
-
-int ExpressionA();
-
-int ExpressionA1Linha();
-
-int ExpressionB();
-
-int ExpressionB1Linha();
-
-int ExpressionC();
-
-int ExpressionC1Linha();
-
-int ExpressionD();
-
 int External_declaration();
 
 int Translation_unit();
@@ -415,6 +543,116 @@ int Translation_unit1Linha();
 int Function_definition();
 
 int Function_definitionLinha();
+
+int Expression();
+
+int Expression1Hash();
+
+int Assignment_expression();
+
+int Assignment_operator();
+
+int Unary_expression();
+
+int Unary_expression1Linha();
+
+int Postfix_expression();
+
+int Postfix_expression1Hash();
+
+int Postfix_expressionHash1Linha();
+
+int Primary_expression();
+
+int Argument_expression_list();
+
+int Argument_expression_list1Hash();
+
+int Unary_operator();
+
+int Cast_expression();
+
+int Type_name();
+
+int Type_name1Linha();
+
+int Specifier_qualifier_list();
+
+int Abstract_declarator();
+
+int Direct_abstract_declarator();
+
+int Direct_abstract_declarator1Linha();
+
+int Direct_abstract_declarator1Hash();
+
+int Direct_abstract_declaratorHash1Linha();
+
+int Constant_expression();
+
+int Conditional_expression();
+
+int Logical_or_expression();
+
+int Logical_or_expression1Hash();
+
+int Logical_and_expression();
+
+int Logical_and_expression1Hash();
+
+int Inclusive_or_expression();
+
+int Inclusive_or_expression1Hash();
+
+int Exclusive_or_expression();
+
+int Exclusive_or_expression1Hash();
+
+int And_expression();
+
+int And_expression1Hash();
+
+int Equality_expression();
+
+int Equality_expression1Hash();
+
+int Relational_expression();
+
+int Relational_expression1Hash();
+
+int Shift_expression();
+
+int Shift_expression1Hash();
+
+int Additive_expression();
+
+int Additive_expression1Hash();
+
+int Multiplicative_expression();
+
+int Multiplicative_expression1Hash();
+
+int Struct_or_union_specifier();
+
+int Struct_or_union_specifier1Linha();
+
+int Struct_or_union();
+
+int Struct_declaration_list();
+
+int Struct_declaration_list1Hash();
+
+int Struct_declaration();
+
+int Struct_declarator_list();
+
+int Struct_declarator_list1Hash();
+
+int Struct_declarator();
+
+int Struct_declarator1Linha();
+
+int Type_specifier();
 
 // <*********** INICIO DO ANALISADOR SINTÁTICO DESCENDENTE RECURSIVO SEM RETROCESSO ***********>
 
@@ -539,9 +777,7 @@ int Init_declarator_list1Linha(){
 
 //Declaration -> Declaration_specifiers Declaration1Linha 
 int Declaration(){
-printf("Declaration\n");
 	if(Declaration_specifiers()){
-		printf("Declaration_specifiers\n");
 		if (Declaration1Linha()){
 			return 1;
 		}
@@ -569,6 +805,7 @@ int Declaration1Linha(){
 
 //Declaration_list -> Declaration Declaration_list1Linha 
 int Declaration_list(){
+	printf("kkk2\n");
 	if(Declaration()){
 		if (Declaration_list1Linha()){
 			return 1;
@@ -626,10 +863,10 @@ int Parameter_list1Linha(){
 	else {return 1;}
 }
 
-//Parameter_declaration -> Declaration_specifiers Declarator 
+//Parameter_declaration -> Declaration_specifiers Parameter_declaration1Linha 
 int Parameter_declaration(){
 	if(Declaration_specifiers()){
-		if (Declarator()){
+		if (Parameter_declaration1Linha()){
 			return 1;
 		}
 		else{return 0;}
@@ -637,8 +874,27 @@ int Parameter_declaration(){
 	else{return 0;}
 }
 
-//Declaration_specifiers -> int | float | char | void 
+//Parameter_declaration1Linha -> Declarator | Abstract_declarator | ? 
+int Parameter_declaration1Linha(){
+	if (Declarator()){
+		return 1;
+	}
+	else if (Abstract_declarator()){
+		return 1;
+	}
+	else {return 1;}
+}
+
+//Declarator -> Type_specifier 
 int Declaration_specifiers(){
+	if (Type_specifier()){
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Type_specifier -> int | float | char | void  | Struct_or_union_specifier
+int Type_specifier(){
 	if(tk == TKInt){// int
 		getToken();
 		return 1;
@@ -655,6 +911,9 @@ int Declaration_specifiers(){
 		getToken();
 		return 1;
 	}
+	else if(Struct_or_union_specifier()){
+		return 1;
+	}
 	else{return 0;}
 }
 
@@ -669,20 +928,16 @@ int Declarator(){
 //Direct_declarator -> identifier Direct_declarator1Linha | ( Direct_declarator ) Direct_declarator1Linha 
 int Direct_declarator(){
 	if(tk == TKId){// identifier
-		printf("Achou id\n");
 		getToken(); 
 		if (Direct_declarator1Linha()){
-			printf("Direct_declarator1Linha\n");
 			return 1;
 		}
 		else{return 0;}
 	}
 	else if(tk == TKAbreParenteses){// (
-		printf("Achou ( \n");
 		getToken(); 
 		if (Direct_declarator()){
 			if(tk == TKFechaParenteses){// )
-				printf("Achou ) \n");
 				getToken();
 				if (Direct_declarator1Linha()){
 					return 1;
@@ -699,10 +954,8 @@ int Direct_declarator(){
 //Direct_declarator1Linha -> ( Direct_declarator2Linha | ? 
 int Direct_declarator1Linha(){
 	if(tk == TKAbreParenteses){// (
-		printf("Achou (\n");
 		getToken(); 
 		if (Direct_declarator2Linha()){
-			printf("Direct_declarator2Linha\n");
 			return 1;
 		}
 		else{return 0;}
@@ -713,15 +966,12 @@ int Direct_declarator1Linha(){
 //Direct_declarator2Linha -> Parameter_type_list ) Direct_declarator2Linha | Identifier_list ) Direct_declarator2Linha | ) Direct_declarator2Linha 
 int Direct_declarator2Linha(){
 	if(Parameter_type_list()){
-		printf("Achou Parameter_type_list\n");
 		if(tk == TKFechaParenteses){// )
-			printf("Achou )\n");
 			return 1;
 		}
 		else{return 0;}
 	}
 	else if(Identifier_list()){
-		printf("Achou Identifier_list\n");
 		if(tk == TKFechaParenteses){// )
 			return 1;
 		}
@@ -729,16 +979,14 @@ int Direct_declarator2Linha(){
 	}
 	else if(tk == TKFechaParenteses){// )
 		getToken();
-		printf("Achou )\n");
 		return 1;
 	}
-	else{printf("Erro Direct_declarator2Linha\n");return 0;}
+	else{return 0;}
 }
 
 //Identifier_list -> identifier Identifier_list1Linha 
 int Identifier_list(){
 	if(tk == TKId){// identifier
-		printf("Achou id\n");
 		getToken(); 
 		if (Identifier_list1Linha()){
 			return 1;
@@ -766,7 +1014,6 @@ int Identifier_list1Linha(){
 
 //Statement -> Compound_statement | Expression_statement | Selection_statement | Iteration_statement | Jump_statement 
 int Statement(){
-	printf("TK:%d",tk);
 	if (Compound_statement()){
 		return 1;
 	}
@@ -787,6 +1034,7 @@ int Statement(){
 
 //Statement_list -> Statement Statement_list1Linha 
 int Statement_list(){
+	printf("kkk3\n");
 	if(Statement()){
 		if (Statement_list1Linha()){
 			return 1;
@@ -809,9 +1057,8 @@ int Statement_list1Linha(){
 
 //Compound_statement -> { Compound_statement1Linha 
 int Compound_statement(){
-	printf("Compound_statement - tk:%d\n",tk);
 	if(tk == TKAbreChaves){// {
-	printf("Achou {\n");
+		printf("cs\n");
 		getToken(); 
 		if (Compound_statement1Linha()){
 			return 1;
@@ -823,9 +1070,16 @@ int Compound_statement(){
 
 //Compound_statement1Linha -> } | Statement_list } | Declaration_list Compound_statement2Linha 
 int Compound_statement1Linha(){
+	printf("kkk\n");
 	if(tk == TKFechaChaves){// }
 		getToken();
 		return 1;
+	}
+	else if(Declaration_list()){
+		if (Compound_statement2Linha()){
+			return 1;
+		}
+		else{return 0;}
 	}
 	else if(Statement_list()){
 		printf("Statement_list\n");
@@ -835,19 +1089,11 @@ int Compound_statement1Linha(){
 		}
 		else{return 0;}
 	}
-	else if(Declaration_list()){
-		printf("Declaration_list\n");
-		if (Compound_statement2Linha()){
-			return 1;
-		}
-		else{return 0;}
-	}
 	else{return 0;}
 }
 
 //Compound_statement2Linha -> } | Statement_list } 
 int Compound_statement2Linha(){
-	printf("ta aqui\n");
 	if(tk == TKFechaChaves){// }
 		getToken();
 		return 1;
@@ -869,6 +1115,7 @@ int Expression_statement(){
 		return 1;
 	}
 	else if(Expression()){
+		printf("kkk4 tk:%d\n",tk);
 		if(tk == TKPontoEVirgula){// ;
 			getToken();
 			return 1;
@@ -885,7 +1132,9 @@ int Selection_statement(){
 		if(tk == TKAbreParenteses){// (
 			getToken();
 			if (Expression()){
+				printf("linha 1135\n");
 				if(tk == TKFechaParenteses){// )
+					printf("fechaParenteses\n");
 					getToken();
 					if (Statement()){
 						if (Selection_statement1Linha()){
@@ -1060,10 +1309,11 @@ int Jump_statement1Linha(){
 	else{return 0;}
 }
 
-//Expression -> ExpressionA Expression1Linha 
+
+//Expression -> Assignment_expression Expression1Hash 
 int Expression(){
-	if(ExpressionA()){
-		if (Expression1Linha()){
+	if(Assignment_expression()){
+		if (Expression1Hash()){
 			return 1;
 		}
 		else{return 0;}
@@ -1071,52 +1321,12 @@ int Expression(){
 	else{return 0;}
 }
 
-//Expression1Linha -> + ExpressionA Expression1Linha | - ExpressionA Expression1Linha | * ExpressionA Expression1Linha | / ExpressionA Expression1Linha | % ExpressionA Expression1Linha | ? 
-int Expression1Linha(){
-	if(tk == TKSoma){// +
+//Expression1Hash -> , Assignment_expression Expression1Hash | ? 
+int Expression1Hash(){
+	if(tk == TKVirgula){// ,
 		getToken(); 
-		if (ExpressionA()){
-			if (Expression1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKSub){// -
-		getToken(); 
-		if (ExpressionA()){
-			if (Expression1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKProd){// *
-		getToken(); 
-		if (ExpressionA()){
-			if (Expression1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKDiv){// /
-		getToken(); 
-		if (ExpressionA()){
-			if (Expression1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKRestoDiv){// %
-		getToken(); 
-		if (ExpressionA()){
-			if (Expression1Linha()){
+		if (Assignment_expression()){
+			if (Expression1Hash()){
 				return 1;
 			}
 			else{return 0;}
@@ -1126,191 +1336,239 @@ int Expression1Linha(){
 	else {return 1;}
 }
 
-//ExpressionA -> ExpressionB ExpressionA1Linha 
-int ExpressionA(){
-	if(ExpressionB()){
-		if (ExpressionA1Linha()){
-			return 1;
+//Assignment_expression -> Unary_expression Assignment_operator Assignment_expression | Conditional_expression 
+int Assignment_expression(){
+	marcaPosToken();
+	if(Unary_expression()){
+		printf("gg4\n");
+		if (Assignment_operator()){
+			if (Assignment_expression()){
+				return 1;
+			}
+			else{return 0;}
 		}
-		else{return 0;}
+		else{restauraPosToken();}
+	}
+	printf("Conditional_expression_lex:%s\n",lex);
+	if (Conditional_expression()){
+		printf("gg5\n");
+		return 1;
 	}
 	else{return 0;}
 }
 
-//ExpressionA1Linha -> & ExpressionB ExpressionA1Linha | bitor ExpressionB ExpressionA1Linha | ^ ExpressionB ExpressionA1Linha | ~ ExpressionB ExpressionA1Linha | ? 
-int ExpressionA1Linha(){
-	if(tk == TKBitAND){// &
-		getToken(); 
-		if (ExpressionB()){
-			if (ExpressionA1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKBitOR){// bitor
-		getToken(); 
-		if (ExpressionB()){
-			if (ExpressionA1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKBitXOR){// ^
-		getToken(); 
-		if (ExpressionB()){
-			if (ExpressionA1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKBitNOT){// ~
-		getToken(); 
-		if (ExpressionB()){
-			if (ExpressionA1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else {return 1;}
-}
-
-//ExpressionB -> ExpressionC ExpressionB1Linha 
-int ExpressionB(){
-	if(ExpressionC()){
-		if (ExpressionB1Linha()){
-			return 1;
-		}
-		else{return 0;}
-	}
-	else{return 0;}
-}
-
-//ExpressionB1Linha -> == ExpressionC ExpressionB1Linha | != ExpressionC ExpressionB1Linha | > ExpressionC ExpressionB1Linha | < ExpressionC ExpressionB1Linha | >= ExpressionC ExpressionB1Linha | <= ExpressionC ExpressionB1Linha | ? 
-int ExpressionB1Linha(){
-	if(tk == TKRelacIGUAL){// ==
-		getToken(); 
-		if (ExpressionC()){
-			if (ExpressionB1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKRelacDIFERENTE){// !=
-		getToken(); 
-		if (ExpressionC()){
-			if (ExpressionB1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKRelacMAIORQUE){// >
-		getToken(); 
-		if (ExpressionC()){
-			if (ExpressionB1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKRelacMENORQUE){// <
-		getToken(); 
-		if (ExpressionC()){
-			if (ExpressionB1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKRelacMAIORouIGUAL){// >=
-		getToken(); 
-		if (ExpressionC()){
-			if (ExpressionB1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKRelacMENORouIGUAL){// <=
-		getToken(); 
-		if (ExpressionC()){
-			if (ExpressionB1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else {return 1;}
-}
-
-//ExpressionC -> ExpressionD ExpressionC1Linha 
-int ExpressionC(){
-	if(ExpressionD()){
-		if (ExpressionC1Linha()){
-			return 1;
-		}
-		else{return 0;}
-	}
-	else{return 0;}
-}
-
-//ExpressionC1Linha -> && ExpressionD ExpressionC1Linha | or ExpressionD ExpressionC1Linha | ! ExpressionD ExpressionC1Linha | ? 
-int ExpressionC1Linha(){
-	if(tk == TKLogicoAND){// &&
-		getToken(); 
-		if (ExpressionD()){
-			if (ExpressionC1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKLogicoOR){// or
-		getToken(); 
-		if (ExpressionD()){
-			if (ExpressionC1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else if(tk == TKLogicoNot){// !
-		getToken(); 
-		if (ExpressionD()){
-			if (ExpressionC1Linha()){
-				return 1;
-			}
-			else{return 0;}
-		}
-		else{return 0;}
-	}
-	else {return 1;}
-}
-
-//ExpressionD -> num | identifier | ( Expression ) 
-int ExpressionD(){
-	if(tk == TKConsInteiro){// num
+//Assignment_operator -> = | *= | /= | %= | += | -= | <<= | >>= | &= | ^= | or_assign 
+int Assignment_operator(){
+	if(tk == TKAtrib){// =
 		getToken();
 		return 1;
 	}
-	else if(tk == TKId){// identifier
+	else if(tk == TKAtribMul){// *=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribDiv){// /=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribRes){// %=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribSom){// +=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribSub){// -=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribShiftLeft){// <<=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribShiftRight){// >>=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribAnd){// &=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribXor){// ^=
+		getToken();
+		return 1;
+	}
+	else if(tk == TKAtribOr){// or_assign
+		getToken();
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Unary_expression -> Postfix_expression | ++ Unary_expression | -- Unary_expression | Unary_operator Cast_expression | SIZEOF Unary_expression1Linha 
+int Unary_expression(){
+	if (Postfix_expression()){
+		printf("gg2\n");
+		return 1;
+	}
+	else if(tk == TKDuploMais){// ++
+		getToken(); 
+		if (Unary_expression()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKDuploSub){// --
+		getToken(); 
+		if (Unary_expression()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(Unary_operator()){
+		if (Cast_expression()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKSizeof){// sizeof
+		getToken(); 
+		if (Unary_expression1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Unary_expression1Linha -> Unary_expression | ( Type_name ) 
+int Unary_expression1Linha(){
+	if (Unary_expression()){
+		return 1;
+	}
+	else if(tk == TKAbreParenteses){// (
+		getToken(); 
+		if (Type_name()){
+			if(tk == TKFechaParenteses){// )
+				getToken();
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Postfix_expression -> Primary_expression Postfix_expression1Hash 
+int Postfix_expression(){
+	if(Primary_expression()){
+		if (Postfix_expression1Hash()){
+			printf("gg tk: %d\n",tk);
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Postfix_expression1Hash -> [ Expression ] Postfix_expression1Hash | ( Postfix_expressionHash1Linha | . id Postfix_expression1Hash | -> id Postfix_expression1Hash | ++ Postfix_expression1Hash | -- Postfix_expression1Hash | ? 
+int Postfix_expression1Hash(){
+	if(tk == TKAbreColchete){// [
+		getToken(); 
+		if (Expression()){
+			if(tk == TKFechaColchete){// ]
+				getToken();
+				if (Postfix_expression1Hash()){
+					return 1;
+				}
+				else{return 0;}
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKAbreParenteses){// (
+		getToken(); 
+		if (Postfix_expressionHash1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKPonto){// .
+		getToken(); 
+		if(tk == TKId){// id
+			getToken();
+			if (Postfix_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKFlecha){// ->
+		getToken(); 
+		if(tk == TKId){// id
+			getToken();
+			if (Postfix_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKDuploMais){// ++
+		getToken(); 
+		if (Postfix_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKDuploSub){// --
+		getToken(); 
+		if (Postfix_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Postfix_expressionHash1Linha -> ) Postfix_expression1Hash | Argument_expression_list ) Postfix_expression1Hash 
+int Postfix_expressionHash1Linha(){
+	if(tk == TKFechaParenteses){// )
+		getToken(); 
+		if (Postfix_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(Argument_expression_list()){
+		if(tk == TKFechaParenteses){// )
+			getToken();
+			if (Postfix_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Primary_expression -> id | number | string | ( Expression ) 
+int Primary_expression(){
+	printf("PE tk=%d\n",tk);
+	if(tk == TKId){// id
+		getToken();
+		return 1;
+	}
+	else if(tk == TKConsInteiro){// number
+		getToken();
+		return 1;
+	}
+	else if(tk == TKConsString){// string
 		getToken();
 		return 1;
 	}
@@ -1322,6 +1580,738 @@ int ExpressionD(){
 				return 1;
 			}
 			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Argument_expression_list -> Assignment_expression Argument_expression_list1Hash 
+int Argument_expression_list(){
+	if(Assignment_expression()){
+		if (Argument_expression_list1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Argument_expression_list1Hash -> , Assignment_expression Argument_expression_list1Hash | ? 
+int Argument_expression_list1Hash(){
+	if(tk == TKVirgula){// ,
+		getToken(); 
+		if (Assignment_expression()){
+			if (Argument_expression_list1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Unary_operator -> & | * | + | - | ~ | ! 
+int Unary_operator(){
+	if(tk == TKBitAND){// &
+		getToken();
+		return 1;
+	}
+	else if(tk == TKProd){// *
+		getToken();
+		return 1;
+	}
+	else if(tk == TKSoma){// +
+		getToken();
+		return 1;
+	}
+	else if(tk == TKSub){// -
+		getToken();
+		return 1;
+	}
+	else if(tk == TKBitNOT){// ~
+		getToken();
+		return 1;
+	}
+	else if(tk == TKLogicoNot){// !
+		getToken();
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Cast_expression -> Unary_expression | ( Type_name ) Cast_expression 
+int Cast_expression(){
+	if (Unary_expression()){
+		return 1;
+	}
+	else if(tk == TKAbreParenteses){// (
+		getToken(); 
+		if (Type_name()){
+			if(tk == TKFechaParenteses){// )
+				getToken();
+				if (Cast_expression()){
+					return 1;
+				}
+				else{return 0;}
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Type_name -> Specifier_qualifier_list Type_name1Linha 
+int Type_name(){
+	if(Specifier_qualifier_list()){
+		if (Type_name1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Type_name1Linha -> ? | Abstract_declarator 
+int Type_name1Linha(){
+return 1;
+if (Abstract_declarator()){
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Specifier_qualifier_list -> Type_specifier 
+int Specifier_qualifier_list(){
+	if (Type_specifier()){
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Abstract_declarator -> Direct_abstract_declarator 
+int Abstract_declarator(){
+	if (Direct_abstract_declarator()){
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Direct_abstract_declarator -> ( Direct_abstract_declarator1Linha | [ Direct_abstract_declarator1Linha 
+int Direct_abstract_declarator(){
+	if(tk == TKAbreParenteses){// (
+		getToken(); 
+		if (Direct_abstract_declarator1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKAbreColchete){// [
+		getToken(); 
+		if (Direct_abstract_declarator1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Direct_abstract_declarator1Linha -> ] Direct_abstract_declarator1Hash | Constant_expression ] Direct_abstract_declarator1Hash | Abstract_declarator ) Direct_abstract_declarator1Hash | ) Direct_abstract_declarator1Hash | Parameter_type_list ) Direct_abstract_declarator1Hash 
+int Direct_abstract_declarator1Linha(){
+	if(tk == TKFechaColchete){// ]
+		getToken(); 
+		if (Direct_abstract_declarator1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(Constant_expression()){
+		if(tk == TKFechaColchete){// ]
+			getToken();
+			if (Direct_abstract_declarator1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(Abstract_declarator()){
+		if(tk == TKFechaParenteses){// )
+			getToken();
+			if (Direct_abstract_declarator1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKFechaParenteses){// )
+		getToken(); 
+		if (Direct_abstract_declarator1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(Parameter_type_list()){
+		if(tk == TKFechaParenteses){// )
+			getToken();
+			if (Direct_abstract_declarator1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Direct_abstract_declarator1Hash -> [ Direct_abstract_declaratorHash1Linha | ( Direct_abstract_declaratorHash1Linha | ? 
+int Direct_abstract_declarator1Hash(){
+	if(tk == TKAbreColchete){// [
+		getToken(); 
+		if (Direct_abstract_declaratorHash1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKAbreParenteses){// (
+		getToken(); 
+		if (Direct_abstract_declaratorHash1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Direct_abstract_declaratorHash1Linha -> ) Direct_abstract_declarator1Hash | Parameter_type_list ) Direct_abstract_declarator1Hash | ] Direct_abstract_declarator1Hash | Constant_expression ] Direct_abstract_declarator1Hash 
+int Direct_abstract_declaratorHash1Linha(){
+	if(tk == TKFechaParenteses){// )
+		getToken(); 
+		if (Direct_abstract_declarator1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(Parameter_type_list()){
+		if(tk == TKFechaParenteses){// )
+			getToken();
+			if (Direct_abstract_declarator1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKFechaColchete){// ]
+		getToken(); 
+		if (Direct_abstract_declarator1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(Constant_expression()){
+		if(tk == TKFechaColchete){// ]
+			getToken();
+			if (Direct_abstract_declarator1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Constant_expression -> Conditional_expression 
+int Constant_expression(){
+	if (Conditional_expression()){
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Conditional_expression -> Logical_or_expression 
+int Conditional_expression(){
+	if (Logical_or_expression()){
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Logical_or_expression -> Logical_and_expression Logical_or_expression1Hash 
+int Logical_or_expression(){
+	if(Logical_and_expression()){
+		if (Logical_or_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Logical_or_expression1Hash -> or Logical_and_expression Logical_or_expression1Hash | ? 
+int Logical_or_expression1Hash(){
+	if(tk == TKLogicoOR){// or
+		getToken(); 
+		if (Logical_and_expression()){
+			if (Logical_or_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Logical_and_expression -> Inclusive_or_expression Logical_and_expression1Hash 
+int Logical_and_expression(){
+	if(Inclusive_or_expression()){
+		if (Logical_and_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Logical_and_expression1Hash -> && Inclusive_or_expression Logical_and_expression1Hash | ? 
+int Logical_and_expression1Hash(){
+	if(tk == TKLogicoAND){// &&
+		getToken(); 
+		if (Inclusive_or_expression()){
+			if (Logical_and_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Inclusive_or_expression -> Exclusive_or_expression Inclusive_or_expression1Hash 
+int Inclusive_or_expression(){
+	if(Exclusive_or_expression()){
+		if (Inclusive_or_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Inclusive_or_expression1Hash -> bitor Exclusive_or_expression Inclusive_or_expression1Hash | ? 
+int Inclusive_or_expression1Hash(){
+	if(tk == TKBitOR){// bitor
+		getToken(); 
+		if (Exclusive_or_expression()){
+			if (Inclusive_or_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Exclusive_or_expression -> And_expression Exclusive_or_expression1Hash 
+int Exclusive_or_expression(){
+	if(And_expression()){
+		if (Exclusive_or_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Exclusive_or_expression1Hash -> ^ And_expression Exclusive_or_expression1Hash | ? 
+int Exclusive_or_expression1Hash(){
+	if(tk == TKBitXOR){// ^
+		getToken(); 
+		if (And_expression()){
+			if (Exclusive_or_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//And_expression -> Equality_expression And_expression1Hash 
+int And_expression(){
+	if(Equality_expression()){
+		if (And_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//And_expression1Hash -> & Equality_expression And_expression1Hash | ? 
+int And_expression1Hash(){
+	if(tk == TKBitAND){// &
+		getToken(); 
+		if (Equality_expression()){
+			if (And_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Equality_expression -> Relational_expression Equality_expression1Hash 
+int Equality_expression(){
+	if(Relational_expression()){
+		if (Equality_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Equality_expression1Hash -> == Relational_expression Equality_expression1Hash | != Relational_expression Equality_expression1Hash | ? 
+int Equality_expression1Hash(){
+	if(tk == TKRelacIGUAL){// ==
+		getToken(); 
+		if (Relational_expression()){
+			if (Equality_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKRelacDIFERENTE){// !=
+		getToken(); 
+		if (Relational_expression()){
+			if (Equality_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Relational_expression -> Shift_expression Relational_expression1Hash 
+int Relational_expression(){
+	if(Shift_expression()){
+		if (Relational_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Relational_expression1Hash -> < Shift_expression Relational_expression1Hash | > Shift_expression Relational_expression1Hash | <= Shift_expression Relational_expression1Hash | >= Shift_expression Relational_expression1Hash | ? 
+int Relational_expression1Hash(){
+	if(tk == TKRelacMENORQUE){// <
+		getToken(); 
+		if (Shift_expression()){
+			if (Relational_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKRelacMAIORQUE){// >
+		getToken(); 
+		if (Shift_expression()){
+			if (Relational_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKRelacMENORouIGUAL){// <=
+		getToken(); 
+		if (Shift_expression()){
+			if (Relational_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKRelacMAIORouIGUAL){// >=
+		getToken(); 
+		if (Shift_expression()){
+			if (Relational_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Shift_expression -> Additive_expression Shift_expression1Hash 
+int Shift_expression(){
+	if(Additive_expression()){
+		if (Shift_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Shift_expression1Hash -> << Additive_expression Shift_expression1Hash | >> Additive_expression Shift_expression1Hash | ? 
+int Shift_expression1Hash(){
+	if(tk == TKShiftLeft){// <<
+		getToken(); 
+		if (Additive_expression()){
+			if (Shift_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKShiftRight){// >>
+		getToken(); 
+		if (Additive_expression()){
+			if (Shift_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Additive_expression -> Multiplicative_expression Additive_expression1Hash 
+int Additive_expression(){
+	if(Multiplicative_expression()){
+		if (Additive_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Additive_expression1Hash -> + Multiplicative_expression Additive_expression1Hash | - Multiplicative_expression Additive_expression1Hash | ? 
+int Additive_expression1Hash(){
+	if(tk == TKSoma){// +
+		getToken(); 
+		if (Multiplicative_expression()){
+			if (Additive_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKSub){// -
+		getToken(); 
+		if (Multiplicative_expression()){
+			if (Additive_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Multiplicative_expression -> Cast_expression Multiplicative_expression1Hash 
+int Multiplicative_expression(){
+	if(Cast_expression()){
+		if (Multiplicative_expression1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Multiplicative_expression1Hash -> * Cast_expression Multiplicative_expression1Hash | / Cast_expression Multiplicative_expression1Hash | % Cast_expression Multiplicative_expression1Hash | ? 
+int Multiplicative_expression1Hash(){
+	if(tk == TKProd){// *
+		getToken(); 
+		if (Cast_expression()){
+			if (Multiplicative_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKDiv){// /
+		getToken(); 
+		if (Cast_expression()){
+			if (Multiplicative_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else if(tk == TKRestoDiv){// %
+		getToken(); 
+		if (Cast_expression()){
+			if (Multiplicative_expression1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Struct_or_union_specifier -> Struct_or_union id Struct_or_union_specifier1Linha 
+int Struct_or_union_specifier(){
+	if(Struct_or_union()){
+		if(tk == TKId){// id
+			getToken();
+			if (Struct_or_union_specifier1Linha()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Struct_or_union_specifier1Linha -> { Struct_declaration_list } | ? 
+int Struct_or_union_specifier1Linha(){
+	if(tk == TKAbreChaves){// {
+		getToken(); 
+		if (Struct_declaration_list()){
+			if(tk == TKFechaChaves){// }
+				getToken();
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Struct_or_union -> struct | union 
+int Struct_or_union(){
+	if(tk == TKStruct){// struct
+		getToken();
+		return 1;
+	}
+	else if(tk == TKUnion){// union
+		getToken();
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Struct_declaration_list -> Struct_declaration Struct_declaration_list1Hash 
+int Struct_declaration_list(){
+	if(Struct_declaration()){
+		if (Struct_declaration_list1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Struct_declaration_list1Hash -> Struct_declaration Struct_declaration_list1Hash | ? 
+int Struct_declaration_list1Hash(){
+	if(Struct_declaration()){
+		if (Struct_declaration_list1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Struct_declaration -> Specifier_qualifier_list Struct_declarator_list ; 
+int Struct_declaration(){
+	if(Specifier_qualifier_list()){
+		if (Struct_declarator_list()){
+			if(tk == TKPontoEVirgula){// ;
+				getToken();
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Struct_declarator_list -> Struct_declarator Struct_declarator_list1Hash 
+int Struct_declarator_list(){
+	if(Struct_declarator()){
+		if (Struct_declarator_list1Hash()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Struct_declarator_list1Hash -> , Struct_declarator Struct_declarator_list1Hash | ? 
+int Struct_declarator_list1Hash(){
+	if(tk == TKVirgula){// ,
+		getToken(); 
+		if (Struct_declarator()){
+			if (Struct_declarator_list1Hash()){
+				return 1;
+			}
+			else{return 0;}
+		}
+		else{return 0;}
+	}
+	else {return 1;}
+}
+
+//Struct_declarator -> Declarator Struct_declarator1Linha | : Constant_expression 
+int Struct_declarator(){
+	if(Declarator()){
+		if (Struct_declarator1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKDoisPontos){// :
+		getToken(); 
+		if (Constant_expression()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Struct_declarator1Linha -> ? | : Constant_expression 
+int Struct_declarator1Linha(){
+if(tk == TKDoisPontos){// :
+		getToken(); 
+		if (Constant_expression()){
+			return 1;
 		}
 		else{return 0;}
 	}
@@ -1367,9 +2357,7 @@ int Translation_unit1Linha(){
 //Function_definition -> Declaration_specifiers Declarator Function_definition’ | Declarator Function_definition’ 
 int Function_definition(){
 	if(Declaration_specifiers()){
-		printf("Declaration_specifiers\n");
 		if (Declarator()){
-			printf("Declarator\n");
 			if (Function_definitionLinha()){
 				return 1;
 			}
@@ -1388,7 +2376,6 @@ int Function_definition(){
 
 //Function_definition’ -> Declaration_list Compound_statement | Compound_statement 
 int Function_definitionLinha(){
-	printf("aqui");
 	if(Declaration_list()){
 		if (Compound_statement()){
 			return 1;

@@ -1,0 +1,1 @@
+Parameter_declaration SETA Declaration_specifiers Declarator | Declaration_specifiers Abstract_declarator | Declaration_specifiers
