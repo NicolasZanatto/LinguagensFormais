@@ -127,7 +127,8 @@ void marcaPosToken() {
 //Implemente aqui a sua função restauraPosToken()
 
 void restauraPosToken() {
-	fseek(arqin,posglobal,SEEK_SET);
+	fseek(arqin,posglobal-1,SEEK_SET);
+	proxC();
 	tk=tkant;
 }
 
@@ -1313,6 +1314,7 @@ int Jump_statement1Linha(){
 //Expression -> Assignment_expression Expression1Hash 
 int Expression(){
 	if(Assignment_expression()){
+		printf("dentro de Assignment_expression\n");
 		if (Expression1Hash()){
 			return 1;
 		}
@@ -1326,6 +1328,7 @@ int Expression1Hash(){
 	if(tk == TKVirgula){// ,
 		getToken(); 
 		if (Assignment_expression()){
+			printf("dentro de Assignment_expression\n");
 			if (Expression1Hash()){
 				return 1;
 			}
@@ -1349,7 +1352,6 @@ int Assignment_expression(){
 		}
 		else{restauraPosToken();}
 	}
-	printf("Conditional_expression_lex:%s\n",lex);
 	if (Conditional_expression()){
 		printf("gg5\n");
 		return 1;
