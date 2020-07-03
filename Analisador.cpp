@@ -126,6 +126,12 @@ void marcaPosToken() {
 
 //Implemente aqui a sua função restauraPosToken()
 
+void restauraPosTokenPorVariavel(long int pos, int tkanterior){
+	fseek(arqin,pos-1,SEEK_SET);
+	proxC();
+	tk=tkanterior;
+}
+
 void restauraPosToken() {
 	fseek(arqin,posglobal-1,SEEK_SET);
 	proxC();
@@ -140,7 +146,7 @@ if (feof(arqin)) {
    return;
    }
 fread(&c,1,1,arqin);
-printf("Leu caracter %c\n",c);
+// printf("Leu caracter %c\n",c);
 }
 
 void getToken()
@@ -806,7 +812,6 @@ int Declaration1Linha(){
 
 //Declaration_list -> Declaration Declaration_list1Linha 
 int Declaration_list(){
-	printf("kkk2\n");
 	if(Declaration()){
 		if (Declaration_list1Linha()){
 			return 1;
@@ -1015,19 +1020,26 @@ int Identifier_list1Linha(){
 
 //Statement -> Compound_statement | Expression_statement | Selection_statement | Iteration_statement | Jump_statement 
 int Statement(){
+	marcaPosToken();
+	long int posAtual = posglobal;
+	int tkAtual = tk;
 	if (Compound_statement()){
 		return 1;
 	}
-	else if (Expression_statement()){
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if (Expression_statement()){
 		return 1;
 	}
-	else if (Selection_statement()){
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if (Selection_statement()){
 		return 1;
 	}
-	else if (Iteration_statement()){
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if (Iteration_statement()){
 		return 1;
 	}
-	else if (Jump_statement()){
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if (Jump_statement()){
 		return 1;
 	}
 	else{return 0;}
@@ -1035,7 +1047,6 @@ int Statement(){
 
 //Statement_list -> Statement Statement_list1Linha 
 int Statement_list(){
-	printf("kkk3\n");
 	if(Statement()){
 		if (Statement_list1Linha()){
 			return 1;
@@ -1059,7 +1070,6 @@ int Statement_list1Linha(){
 //Compound_statement -> { Compound_statement1Linha 
 int Compound_statement(){
 	if(tk == TKAbreChaves){// {
-		printf("cs\n");
 		getToken(); 
 		if (Compound_statement1Linha()){
 			return 1;
@@ -1071,7 +1081,6 @@ int Compound_statement(){
 
 //Compound_statement1Linha -> } | Statement_list } | Declaration_list Compound_statement2Linha 
 int Compound_statement1Linha(){
-	printf("kkk\n");
 	if(tk == TKFechaChaves){// }
 		getToken();
 		return 1;
@@ -1116,7 +1125,6 @@ int Expression_statement(){
 		return 1;
 	}
 	else if(Expression()){
-		printf("kkk4 tk:%d\n",tk);
 		if(tk == TKPontoEVirgula){// ;
 			getToken();
 			return 1;
@@ -1314,7 +1322,6 @@ int Jump_statement1Linha(){
 //Expression -> Assignment_expression Expression1Hash 
 int Expression(){
 	if(Assignment_expression()){
-		printf("dentro de Assignment_expression\n");
 		if (Expression1Hash()){
 			return 1;
 		}
@@ -1328,7 +1335,6 @@ int Expression1Hash(){
 	if(tk == TKVirgula){// ,
 		getToken(); 
 		if (Assignment_expression()){
-			printf("dentro de Assignment_expression\n");
 			if (Expression1Hash()){
 				return 1;
 			}
@@ -1343,7 +1349,6 @@ int Expression1Hash(){
 int Assignment_expression(){
 	marcaPosToken();
 	if(Unary_expression()){
-		printf("gg4\n");
 		if (Assignment_operator()){
 			if (Assignment_expression()){
 				return 1;
@@ -1353,7 +1358,6 @@ int Assignment_expression(){
 		else{restauraPosToken();}
 	}
 	if (Conditional_expression()){
-		printf("gg5\n");
 		return 1;
 	}
 	else{return 0;}
@@ -1561,7 +1565,6 @@ int Postfix_expressionHash1Linha(){
 
 //Primary_expression -> id | number | string | ( Expression ) 
 int Primary_expression(){
-	printf("PE tk=%d\n",tk);
 	if(tk == TKId){// id
 		getToken();
 		return 1;
