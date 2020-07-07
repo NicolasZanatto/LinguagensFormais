@@ -118,9 +118,7 @@ long int posglobal;
 int tkant;
 
 void marcaPosToken() {
-	printf("posglobal:%ld,tk:%d\n",posglobal,tk);
 	posglobal=ftell(arqin);
-	printf("posglobal:%ld,tk:%d\n",posglobal,tk);
 	tkant=tk;
 }
 
@@ -446,8 +444,8 @@ while (!fim)
              if (c=='^'){lex[posl]='\0';proxC();tk=TKBitXOR;printf("Reconheceu token TKBitXOR\n");return;}
              if (c=='~'){lex[posl]='\0';proxC();tk=TKBitNOT;printf("Reconheceu token TKBitNOT\n");return;}
 			 if (c=='!'){lex[posl]='\0';proxC();tk=TKLogicoNot;printf("Reconheceu token TKLogicoNot\n");return;}
-			 if (c=='['){lex[posl]='\0';proxC();tk=TKAbreColchete;printf("Reconheceu token TKAbrePar\n");return;}
-             if (c==']'){lex[posl]='\0';proxC();tk=TKFechaColchete;printf("Reconheceu token TKAbrePar\n");return;}
+			 if (c=='['){lex[posl]='\0';proxC();tk=TKAbreColchete;printf("Reconheceu token TKAbreColchete\n");return;}
+             if (c==']'){lex[posl]='\0';proxC();tk=TKFechaColchete;printf("Reconheceu token TKFechaColchete\n");return;}
 			 if (c==-1){lex[posl]='\0';proxC();tk=TKFimArquivo;printf("Reconheceu token TKFimArquivo\n");return;}
              if (c==' ' || c=='\n' || c=='\t' || c=='\r') {proxC();posl--;break;}
              if (c=='\0') {tk=-1;return;}
@@ -971,14 +969,19 @@ int Direct_declarator1Linha(){
 
 //Direct_declarator2Linha -> Parameter_type_list ) Direct_declarator2Linha | Identifier_list ) Direct_declarator2Linha | ) Direct_declarator2Linha 
 int Direct_declarator2Linha(){
+	marcaPosToken();
+	long int posAtual = posglobal;
+	int tkAtual = tk;
 	if(Parameter_type_list()){
 		if(tk == TKFechaParenteses){// )
+			getToken();
 			return 1;
 		}
 		else{return 0;}
 	}
 	else if(Identifier_list()){
 		if(tk == TKFechaParenteses){// )
+			getToken();
 			return 1;
 		}
 		else{return 0;}
@@ -1081,18 +1084,22 @@ int Compound_statement(){
 
 //Compound_statement1Linha -> } | Statement_list } | Declaration_list Compound_statement2Linha 
 int Compound_statement1Linha(){
+	marcaPosToken();
+	long int posAtual = posglobal;
+	int tkAtual = tk;
 	if(tk == TKFechaChaves){// }
 		getToken();
 		return 1;
 	}
-	else if(Declaration_list()){
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if(Declaration_list()){
 		if (Compound_statement2Linha()){
 			return 1;
 		}
 		else{return 0;}
 	}
-	else if(Statement_list()){
-		printf("Statement_list\n");
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if(Statement_list()){
 		if(tk == TKFechaChaves){// }
 			getToken();
 			return 1;
@@ -1348,6 +1355,8 @@ int Expression1Hash(){
 //Assignment_expression -> Unary_expression Assignment_operator Assignment_expression | Conditional_expression 
 int Assignment_expression(){
 	marcaPosToken();
+	long int posAtual = posglobal;
+	int tkAtual = tk;
 	if(Unary_expression()){
 		if (Assignment_operator()){
 			if (Assignment_expression()){
@@ -1355,7 +1364,7 @@ int Assignment_expression(){
 			}
 			else{return 0;}
 		}
-		else{restauraPosToken();}
+		else{restauraPosTokenPorVariavel(posAtual,tkAtual);}
 	}
 	if (Conditional_expression()){
 		return 1;
@@ -1415,7 +1424,6 @@ int Assignment_operator(){
 //Unary_expression -> Postfix_expression | ++ Unary_expression | -- Unary_expression | Unary_operator Cast_expression | SIZEOF Unary_expression1Linha 
 int Unary_expression(){
 	if (Postfix_expression()){
-		printf("gg2\n");
 		return 1;
 	}
 	else if(tk == TKDuploMais){// ++
@@ -1471,7 +1479,6 @@ int Unary_expression1Linha(){
 int Postfix_expression(){
 	if(Primary_expression()){
 		if (Postfix_expression1Hash()){
-			printf("gg tk: %d\n",tk);
 			return 1;
 		}
 		else{return 0;}
@@ -2325,13 +2332,16 @@ if(tk == TKDoisPontos){// :
 
 //External_declaration -> Function_definition | Declaration 
 int External_declaration(){
+	marcaPosToken();
+	long int posAtual = posglobal;
+	int tkAtual = tk;
 	if (Function_definition()){
 		printf("Entrou Function_definition\n");
 		return 1;
 	}
-	else if (Declaration()){
-	printf("Entrou Declaration\n");
-
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if (Declaration()){
+		printf("Entrou Declaration\n");
 		return 1;
 	}
 	else{return 0;}
