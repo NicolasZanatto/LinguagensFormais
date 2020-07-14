@@ -505,9 +505,13 @@ int Declarator();
 
 int Direct_declarator();
 
-int Direct_declarator1Linha();
+int Direct_declarator1Hash();
 
 int Direct_declarator2Linha();
+
+int Direct_declarator3Linha();
+
+int Direct_declarator1Linha();
 
 int Identifier_list();
 
@@ -929,24 +933,20 @@ int Declarator(){
 	else{return 0;}
 }
 
-//Direct_declarator -> identifier Direct_declarator1Linha | ( Direct_declarator ) Direct_declarator1Linha 
+//Direct_declarator -> id Direct_declarator1Hash | ( Declarator) Direct_declarator1Hash 
 int Direct_declarator(){
-	if(tk == TKId){// identifier
+	if(tk == TKId){// id
 		getToken(); 
-		if (Direct_declarator1Linha()){
+		if (Direct_declarator1Hash()){
 			return 1;
 		}
 		else{return 0;}
 	}
 	else if(tk == TKAbreParenteses){// (
 		getToken(); 
-		if (Direct_declarator()){
-			if(tk == TKFechaParenteses){// )
-				getToken();
-				if (Direct_declarator1Linha()){
-					return 1;
-				}
-				else{return 0;}
+		if (Declarator()){
+			if (Direct_declarator1Hash()){
+				return 1;
 			}
 			else{return 0;}
 		}
@@ -955,11 +955,10 @@ int Direct_declarator(){
 	else{return 0;}
 }
 
-//Direct_declarator1Linha -> ( Direct_declarator2Linha | ? 
-int Direct_declarator1Linha(){
-	if(tk == TKAbreParenteses){// (
-		getToken(); 
-		if (Direct_declarator2Linha()){
+//Direct_declarator1Hash -> Direct_declarator2Linha Direct_declarator1Hash | ? 
+int Direct_declarator1Hash(){
+	if(Direct_declarator2Linha()){
+		if (Direct_declarator1Hash()){
 			return 1;
 		}
 		else{return 0;}
@@ -967,11 +966,27 @@ int Direct_declarator1Linha(){
 	else {return 1;}
 }
 
-//Direct_declarator2Linha -> Parameter_type_list ) Direct_declarator2Linha | Identifier_list ) Direct_declarator2Linha | ) Direct_declarator2Linha 
+//Direct_declarator2Linha -> [ Direct_declarator1Linha | ( Direct_declarator3Linha 
 int Direct_declarator2Linha(){
-	marcaPosToken();
-	long int posAtual = posglobal;
-	int tkAtual = tk;
+	if(tk == TKAbreColchete){// [
+		getToken(); 
+		if (Direct_declarator1Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKAbreParenteses){// (
+		getToken(); 
+		if (Direct_declarator3Linha()){
+			return 1;
+		}
+		else{return 0;}
+	}
+	else{return 0;}
+}
+
+//Direct_declarator3Linha -> Parameter_type_list ) | Identifier_list ) | ) 
+int Direct_declarator3Linha(){
 	if(Parameter_type_list()){
 		if(tk == TKFechaParenteses){// )
 			getToken();
@@ -987,6 +1002,22 @@ int Direct_declarator2Linha(){
 		else{return 0;}
 	}
 	else if(tk == TKFechaParenteses){// )
+		getToken();
+		return 1;
+	}
+	else{return 0;}
+}
+
+//Direct_declarator1Linha -> Constant_expression ] | ] 
+int Direct_declarator1Linha(){
+	if(Constant_expression()){
+		if(tk == TKFechaColchete){// ]
+			getToken();
+			return 1;
+		}
+		else{return 0;}
+	}
+	else if(tk == TKFechaColchete){// ]
 		getToken();
 		return 1;
 	}
@@ -2371,6 +2402,9 @@ int Translation_unit1Linha(){
 
 //Function_definition -> Declaration_specifiers Declarator Function_definition’ | Declarator Function_definition’ 
 int Function_definition(){
+	marcaPosToken();
+	long int posAtual = posglobal;
+	int tkAtual = tk;
 	if(Declaration_specifiers()){
 		if (Declarator()){
 			if (Function_definitionLinha()){
@@ -2380,7 +2414,8 @@ int Function_definition(){
 		}
 		else{return 0;}
 	}
-	else if(Declarator()){
+	restauraPosTokenPorVariavel(posAtual,tkAtual);
+	if(Declarator()){
 		if (Function_definitionLinha()){
 			return 1;
 		}
