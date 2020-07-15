@@ -1,0 +1,31 @@
+Expression SETA  Expression , Assignment_expression | Assignment_expression
+Assignment_expression SETA Unary_expression Assignment_operator Assignment_expression | Conditional_expression
+Assignment_operator SETA = | *= | /= | %= | += | -= | <<= | >>= | &= | ^= | or_assign
+Unary_expression SETA Postfix_expression | ++ Unary_expression | -- Unary_expression | Unary_operator Cast_expression | sizeof Unary_expression | sizeof ( Type_name )
+Postfix_expression SETA Primary_expression | Postfix_expression [ Expression ] | Postfix_expression ( ) | Postfix_expression ( Argument_expression_list ) | Postfix_expression . id | Postfix_expression -> id | Postfix_expression ++ | Postfix_expression --
+Primary_expression SETA id | number | string | ( Expression )
+Argument_expression_list SETA Assignment_expression | Argument_expression_list , Assignment_expression
+Unary_operator SETA & | * | + | - | ~ | !
+Cast_expression SETA Unary_expression | ( Type_name ) Cast_expression
+Type_name SETA Specifier_qualifier_list | Specifier_qualifier_list Abstract_declarator
+Specifier_qualifier_list SETA Type_specifier
+Abstract_declarator SETA Direct_abstract_declarator
+Direct_abstract_declarator SETA ( Abstract_declarator ) | [ ] | [ Constant_expression ] | Direct_abstract_declarator [ ] | Direct_abstract_declarator [ Constant_expression ] | ( ) | ( Parameter_type_list ) | Direct_abstract_declarator ( ) | Direct_abstract_declarator ( Parameter_type_list )
+Constant_expression SETA Conditional_expression
+Conditional_expression SETA Logical_or_expression
+Logical_or_expression SETA Logical_and_expression | Logical_or_expression or Logical_and_expression
+Logical_and_expression SETA Inclusive_or_expression | Logical_and_expression && Inclusive_or_expression
+Inclusive_or_expression SETA Exclusive_or_expression | Inclusive_or_expression bitor  Exclusive_or_expression
+Exclusive_or_expression SETA And_expression | Exclusive_or_expression ^ And_expression
+And_expression SETA Equality_expression | And_expression & Equality_expression
+Equality_expression SETA Relational_expression | Equality_expression == Relational_expression | Equality_expression != Relational_expression
+Relational_expression SETA  Shift_expression | Relational_expression < Shift_expression | Relational_expression > Shift_expression | Relational_expression <= Shift_expression | Relational_expression >= Shift_expression
+Shift_expression SETA Additive_expression | Shift_expression << Additive_expression | Shift_expression >> Additive_expression
+Additive_expression SETA Multiplicative_expression | Additive_expression + Multiplicative_expression | Additive_expression - Multiplicative_expression
+Multiplicative_expression SETA Cast_expression | Multiplicative_expression * Cast_expression | Multiplicative_expression / Cast_expression | Multiplicative_expression % Cast_expression
+Struct_or_union_specifier SETA Struct_or_union id { Struct_declaration_list } | Struct_or_union { Struct_declaration_list } | Struct_or_union id
+Struct_or_union SETA struct | union
+Struct_declaration_list SETA Struct_declaration | Struct_declaration_list Struct_declaration
+Struct_declaration SETA Specifier_qualifier_list Struct_declarator_list ;
+Struct_declarator_list SETA Struct_declarator | Struct_declarator_list , Struct_declarator
+Struct_declarator SETA Declarator | : Constant_expression | Declarator : Constant_expression
